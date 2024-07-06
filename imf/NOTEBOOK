@@ -1,0 +1,20 @@
+#    SPDX-FileCopyrightText: 2024 Pedrest15 <pedroandrade@usp.br>
+#   
+#    SPDX-License-Identifier: GPL-3.0-or-later
+
+Após realizar análises acerca do código presente em decode, decodificou-se o arquivo hack.gdb.
+Este contém instruções necessárias para se obter a mensagem.
+
+O caminho lógico é o seguinte:
+
+1) set env LD_LIBRARY_PATH . ==> Configura o caminho da biblioteca.
+
+2) b *0x8049395 ==> Aciona um BreakPoint na instrução que verifica o valor de `%eax`.
+
+3) run secret.cry ==> Executa o decode com o arquivo secret.cry como entrada.
+
+4) set $eax=0x1 ==> Altera o valor de `%eax` para 1 de forma a forçar a execução do bloco else.
+
+5) c ==> Continua a execuçao do programa.
+
+Com a continuidade do programa através do bloco else, a mensagem foi revelada.
