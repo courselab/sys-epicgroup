@@ -1,0 +1,178 @@
+#    SPDX-FileCopyrightText: 2024 Pedrest15 <pedroandrade@usp.br>
+#   
+#    SPDX-License-Identifier: GPL-3.0-or-later
+
+### P1:
+    Tendo em vista que ASLR é uma ténica de segurança que randomiza a localização das áreas de memória utilizadas pelos processos, dificultando ataques.
+
+    Por primeiro, rodou-se o código com ASLR habilitado:
+
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5b30319d
+
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5d66119d
+
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5826b19d
+
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5e1b419d
+
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x617f119d
+
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5df1819d
+
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5c87c19d
+
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x63a8619d
+
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x584a719d
+
+
+    Depois, desativou-se o método de segurança, gerando como resultado:
+
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5655619d
+    
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5655619d
+    
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5655619d
+    
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5655619d
+    
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5655619d
+    
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5655619d
+    
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5655619d
+    
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5655619d
+    
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5655619d
+    
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ ./p1
+    Main's ddress: 0x5655619d
+    
+    pedrest@pedrest:~/Documentos/sys-epicgroup/quiz/quiz$ 
+
+    A variação nos endereços de memória é devido ao ASLR, uma técnica de segurança importante.
+
+### P2:
+
+    Ao compilar e executar o código contido em p2.c sem nenhuma alteração, percebe-se que o acesso foi liberado para `foo` e `batata`. Ou seja, mesmo para uma senha incorreta, segundo caso, o acesso é liberado. Dessa forma, percebe-se que o programa não valida corretamente a senha inserida. Com isso, é necessário fazer uma modificação para assegurar a devida verificação.
+
+    Uma maneira de efetuar a modificação é recompilando o programa com proteção de pilha, por meio do comando ``` make CFLAGS=-fstack-protector p2 ```. Ao executar esse novo executável com os dois casos anteriores, a senha incorreta teve acesso negado, como desejado.
+
+### P3:
+    a) Como 'foo' chama 'bar' e passa parâmetros
+
+    Sabe-se que "foo" chama "bar" e passa parâmetros. Ao observar a linha onde isso ocorre, encontra-se:
+
+    80491af:       e8 eb ff ff ff    call   804919f <bar>
+
+    Sendo que antes da chamada, o parâmetro é colocado na pilha:
+    
+    80491ae:       50                push   %eax
+
+    A isso, denomina-se calling convention: uma convenção que define a passagem de parâmetros entre as funções e como a stack frame é manipulada.
+
+    Especificamente para a arquitetura x86, a convenção é chamada de CDEL na qual os parâmetros são empilhados da direita para a esquerda e a função que chama é também responsável por limpar a pilha. Isto é utilizado pelo GCC.
+
+    Ademais, a ABI (Interface Binária de Aplicação) é um conjunto que engloba a calling convention, responsável pela comunicação em nível binário das partes de um programa.
+
+    b) Como 'bar' retorna seu resultado para 'foo'
+
+    Isso ocorre por meio do registrador '%eax'
+
+    80491ce:       8b 45 fc          mov    -0x4(%ebp),%eax
+
+    Após isso, "foo" utiliza do valor retornado e move-o até -0xc(%ebp). O registrador '%eax' é comumente usado para armazenar valores de retorno de funções. Esse fato se relaciona com calling convention.
+
+    c) Propósito das instruções no início e fim de 'foo'
+
+    As instruções de 'foo' são usadas para configurar e desmontar a stack frame da função, sendo parte de convenções fundamentais para que o contexto da função chamadora seja preservada e, também, para preparar o ambiente para execução.
+
+    d) Propósito da terceira linha em 'foo' e 'bar'
+
+    A terceira linha referida é:
+
+    80491a2:       83 ec 18          sub    $0x18,%esp  (em 'foo')
+    80491c2:       83 ec 10          sub    $0x10,%esp  (em 'bar')
+
+    A partir disso, percebe-se que essas intruções ajustam %esp, o ponteiro da pilha, de forma a alocar espaço para as variáveis locais da função. Estando relacionado ao ABI x86, este define o espaço de pilha como gerenciado para manter a função independentemente e segura.
+
+    e) Mudança no tipo de retorno de 'bar' para 'char'
+
+    Tendo feito a alteração solicitada, observa-se que depois da alteração, o compilador adicionou a instrução `movsbl %al,%eax`. Esta instrução `movsbl` realiza uma extensão de sinal de byte (sign-extend) do byte de `al` para `eax`, preenchendo `eax` com zeros ou uns, dependendo do sinal do byte original em `al`.
+
+### P4:
+
+    a) Execução de cada programa
+
+    ==> p4-v1:
+            O programa é executado corretamente e imprime "Foo".
+
+    ==> p4-v2:
+            O programa é executado corretamente e imprime "Foo".
+
+    ==> p4-v3:
+            O programa retornou o erro "./p4-v3: error while loading shared libraries: libp4.so: cannot open shared object file: No such file or directory". Depois de definir "LD_LIBRARY_PATH" o programa é executado corretamente e imprime "Foo", já que assim a biblioteca dinâmica "libp4.so" pode ser encontrada.
+
+    b) Comparação de tamanho dos programas:
+
+    - `p4-v1`: 15020 bytes
+    - `p4-v2`: 14980 bytes
+    - `p4-v3`: 14924 bytes
+
+    c) Inspeção com `nm`
+
+    ==> p4-v1:
+            `foo` e `bar` são definidos como símbolos (`T` para função).
+
+    ==> p4-v2:
+            `foo` é listado como símbolo (`T` para função), enquanto `bar` não é listado (símbolo interno ao arquivo estático).
+
+    ==> p4-v3:
+            foo` é listado como símbolo (`T` para função), mas `bar` não é listado diretamente (considerado como parte da biblioteca dinâmica).
+
+    d) Inspeção com `readelf -d`
+
+    ==> p4-v1 e p4-v2:
+            Ambos precisam apenas de "libc.so.6".
+
+    ==> p4-v3:
+            Este precisa da biblioteca dinâmica "libp4.so" e de "libc.so.6".
+
+    e) Discussão sobre bibliotecas estáticas e dinâmicas
+
+    Instalação em hosts diferentes (versão - a):
+            Estático é mais fácil de distribuir, visto que as dependências estão todas inclusas no executável.
+            
+            Dinâmico requer que as bibliotecas sejam dispostas pelo sistema, porém, em termos de espaço, pode ser mais eficiente.
+
+    Atualização da biblioteca (versão - b):
+            Estático requer recompilação do programa para poder incluir as atualizações.
+
+            Dinâmico as atualizações na biblioteca podem beneficiar todos os programas que a utilizam sem ter necessidade de recompilar.
+
+    Uso por muitos programas no mesmo host (versão - c):
+            Estático onde cada programa possui sua cópia da biblioteca, de forma a ocupar mais espaço de memória.
+    
+            Dinâmico onde as bibliotecas compartilhadas são carregadas na memória por uma vez, de forma a economizar espaço.
+
+
+
