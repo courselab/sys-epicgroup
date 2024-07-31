@@ -18,3 +18,14 @@ O caminho lógico é o seguinte:
 5) c ==> Continua a execuçao do programa.
 
 Com a continuidade do programa através do bloco else, a mensagem foi revelada.
+
+~~~> Bem, a ideia era que o agente não tem acesso ao GDB e precisa de um modo não invasivo
+     para quebrar a segurança. O problema poderia ser facilmente resolvido utilizando um
+     método diferente... Mas, enfim, o enunciado não deixava isso claro e a solução
+     apresentada funciona.
+
+     Contudo, a solução não explica a análise feita, quais informações foram extraídas
+     e como essas levaram à implementção de hack.gdb.
+
+     Total: 9
+     
